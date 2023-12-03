@@ -4,20 +4,24 @@ dotenv.config();
 
 import express from 'express';
 import { authenticationMiddleware } from './authentication';
-import { mongoConnecter } from './database';
-import { job_router } from './routes/job';
-import { auth_router } from './routes/auth';
-import { student_router } from './routes/student';
+import { mongoConnector } from './database';
+import { jobRouter } from './routes/job';
+import { authRouter } from './routes/auth';
+import { studentRouter } from './routes/student';
+import { CONFIG } from './config';
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+// TODO: https://repost.aws/knowledge-center/elastic-beanstalk-nginx-configuration
 app.use(express.urlencoded({ extended: true })); // TODO
-app.use('/auth', auth_router);
-app.use(authenticationMiddleware);
-app.use('/job', job_router);
-app.use('/student', student_router);
-mongoConnecter.connect(process.env.DATABASE_URL || '');
 
-const PORT = process.env.PORT || 3000;
+app.use('/auth', authRouter);
+app.use(authenticationMiddleware);
+app.use('/job', jobRouter);
+app.use('/student', studentRouter);
+
+mongoConnector.connect(CONFIG.DATABASE_URL);
+
+const PORT = CONFIG.PORT;
 app.listen(PORT, () => console.log(`Listening on Port ${PORT}`));

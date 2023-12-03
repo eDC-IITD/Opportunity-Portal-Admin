@@ -1,12 +1,12 @@
 import express, { Request, Response } from 'express';
 import { Job } from '../database/models';
 
-const job_router = express.Router();
+const jobRouter = express.Router();
 
-job_router.post('/', async (req: Request, res: Response) => {
+jobRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const JobList = await Job.find();
-    res.json(JobList);
+    const jobList = await Job.find().lean();
+    res.json(jobList);
   } catch (error: any) {
     console.log('error in job.ts GET /');
     console.log(error);
@@ -14,23 +14,23 @@ job_router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-job_router.put('/:job_id/approval', async (req: Request, res: Response) => {
+jobRouter.patch('/:jobId/approval', async (req: Request, res: Response) => {
   try {
-    const jobId: string = req.params.job_id;
+    const jobId: string = req.params['jobId'];
     const approval: string | undefined = req.body.approval;
 
     if (!approval || !['pending', 'approved', 'disapproved'].includes(approval))
       return res.status(400).send({ message: 'Invalid approval status' });
 
-    const updatedJob = await Job.findByIdAndUpdate(jobId, { approval }, { new: true });
+    const updatedJob = await Job.findByIdAndUpdate(jobId, { approval }, { new: true }).lean();
     if (!updatedJob) return res.status(404).send({ message: 'Job not found' });
 
     res.send(updatedJob);
   } catch (error: any) {
-    console.log('error in job.ts PUT /:job_id/approval');
+    console.log('error in job.ts PATCH /:jobId/approval');
     console.log(error);
     res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
   }
 });
 
-export { job_router };
+export { jobRouter };

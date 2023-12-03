@@ -4,11 +4,12 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IStartup extends Document {
   companyName: string;
   email: string;
-  otp: string;
+  otp?: string; // TODO: Delete when not active
   founder: Array<{
-    id: number;
+    id: number; // TODO: ??
     name: string;
     bio: string;
+    // TOOD: LinkedIn?
   }>;
   jobs: Types.ObjectId[];
   companyVision: string;
@@ -43,16 +44,18 @@ export interface IStudent extends Document {
   name: string;
   email: string;
   otp: string;
+  // TODO: Create new object for application
+  // Application {jobId, studentId, status, date, CV, coverLetter}
   jobsApplied: Array<{
     jobId: Types.ObjectId;
     status: string;
   }>;
-  cgpa: number;
-  course: string;
+  cgpa: number; // TODO: Constraints?
+  course: string; // Validated from frontend options
   department: string;
   resumeLink: string;
-  year: string;
-  isVerified: boolean;
+  year: string; // TODO: number
+  isVerified: boolean; // TODO: Create a verification object, with adminId, timestamp, comments
 }
 
 // Student Schema
@@ -62,6 +65,7 @@ const StudentSchema: Schema = new Schema({
   otp: { type: String, required: true },
   jobsApplied: [
     {
+      // TODO: Remove circular reference, use ref: Job.name
       jobId: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
       status: { type: String, required: true },
     },
@@ -124,10 +128,11 @@ const JobSchema: Schema = new Schema({
   },
   deadline: { type: Date, required: true },
   selectionProcess: { type: String, required: true },
-  startUpId: { type: Schema.Types.ObjectId, ref: 'Startup', required: true },
+  startUpId: { type: Schema.Types.ObjectId, ref: Startup.name, required: true },
+  // TODO: Do not store arrays in DB
   studentsApplied: [
     {
-      studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true },
+      studentId: { type: Schema.Types.ObjectId, ref: Student.name, required: true },
       name: { type: String, required: true },
       email: { type: String, required: true },
       course: { type: String, required: true },

@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-// Your secret key for signing and verifying JWTs
-const secretKey = 'your-secret-key';
+import { CONFIG } from '../config';
 
 const authenticationMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Check if the Authorization header is present in the request
@@ -13,19 +11,23 @@ const authenticationMiddleware = (req: Request, res: Response, next: NextFunctio
   }
 
   // Verify and decode the token
-  jwt.verify(token, secretKey, (err, decoded) => {
+  jwt.verify(token, CONFIG.JWT_SECRET_KEY, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: 'Unauthorized - Invalid token' });
+      return res.status(401).json({ message: 'Unauthorized - Invalid token', error: err.message });
     }
 
+    const decodedUserId: string = (decoded as jwt.JwtPayload).userId;
+    if (!decodedUserId) {
+      return res.status(401).json({ message: 'Unauthorized - Invalid payload' });
+    }
     // If the token is valid, you can access the payload (decoded) in subsequent middleware or route handlers
-    (req as any).user = decoded;
-    if (req.body.userID) {
-      if (req.body.userID !== (decoded as any).userId.toString()) {
-        return res.status(401).json({ message: 'Unauthorized - Invalid token' });
+    if (req.body.userId) {
+      if (req.body.userId !== decodedUserId) {
+        return res.status(401).json({ message: 'Unauthorized - Invalid userId' });
       }
     }
 
+    req.user = { userId: decodedUserId };
     next();
   });
 };

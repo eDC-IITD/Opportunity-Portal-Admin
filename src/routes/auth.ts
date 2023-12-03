@@ -3,24 +3,14 @@ import bcrypt from 'bcrypt';
 import { Admin } from '../database/models';
 import { IAdmin } from '../database/models';
 import jwt from 'jsonwebtoken';
+import { CONFIG } from '../config';
 
-const auth_router = express.Router();
+const authRouter = express.Router();
 
-auth_router.post('/', async (req: Request, res: Response) => {
-  try {
-    // the code has already been aproved till this point
-    return res.send({ message: 'approved' });
-  } catch (error: any) {
-    console.log("error in auth.ts POST '/'");
-    console.log(error);
-    res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
-  }
-});
-
-auth_router.post('/register', async (req, res) => {
+authRouter.post('/register', async (req: Request, res: Response) => {
   const { username, password, superUserCode } = req.body;
 
-  if (superUserCode !== process.env.SUPER_USER_CODE) {
+  if (superUserCode !== CONFIG.SUPER_USER_CODE) {
     return res.status(401).send('Unauthorized');
   }
 
@@ -40,10 +30,10 @@ auth_router.post('/register', async (req, res) => {
   }
 });
 
-auth_router.post('/login', async (req, res) => {
+authRouter.post('/login', async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const admin: IAdmin | null = await Admin.findOne({ username });
+  const admin: IAdmin | null = await Admin.findOne({ username }).lean();
 
   if (!admin) {
     return res.status(404).send('Admin not found');
@@ -56,10 +46,10 @@ auth_router.post('/login', async (req, res) => {
   }
 
   // Generate a JWT token
-  const token = jwt.sign({ userId: admin._id }, 'your-secret-key');
-  const userID = admin._id;
+  const token = jwt.sign({ userId: admin._id }, CONFIG.JWT_SECRET_KEY);
+  const userId = admin._id; // TODO: Decrypt on Frontend
 
-  res.json({ token, userID });
+  res.json({ token, userId });
 });
 
-export { auth_router };
+export { authRouter };
