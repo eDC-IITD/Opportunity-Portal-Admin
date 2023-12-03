@@ -4,7 +4,7 @@ import { CONFIG } from '../config';
 
 const authenticationMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Check if the Authorization header is present in the request
-  const token = req.headers.authorization;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized - No token provided' });

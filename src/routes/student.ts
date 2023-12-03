@@ -8,8 +8,8 @@ studentRouter.get('/', async (req: Request, res: Response) => {
     const studentList = await Student.find().lean();
     res.json(studentList);
   } catch (error: any) {
-    console.log('error in job.ts GET /');
-    console.log(error);
+    console.error('error in job.ts GET /');
+    console.error(error);
     res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
   }
 });
@@ -23,8 +23,8 @@ studentRouter.patch('/:studentId', async (req: Request, res: Response) => {
     if (!updatedProfile) return res.status(404).send({ message: 'Student not found' });
     res.send(updatedProfile);
   } catch (error: any) {
-    console.log('error in job.ts PATCH /:studentId');
-    console.log(error);
+    console.error('error in job.ts PATCH /:studentId');
+    console.error(error);
     res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
   }
 });

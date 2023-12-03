@@ -8,8 +8,8 @@ jobRouter.get('/', async (req: Request, res: Response) => {
     const jobList = await Job.find().lean();
     res.json(jobList);
   } catch (error: any) {
-    console.log('error in job.ts GET /');
-    console.log(error);
+    console.error('error in job.ts GET /');
+    console.error(error);
     res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
   }
 });
@@ -27,8 +27,8 @@ jobRouter.patch('/:jobId/approval', async (req: Request, res: Response) => {
 
     res.send(updatedJob);
   } catch (error: any) {
-    console.log('error in job.ts PATCH /:jobId/approval');
-    console.log(error);
+    console.error('error in job.ts PATCH /:jobId/approval');
+    console.error(error);
     res.status(500).send({ message: 'Server error', error: error.message || 'Internal Server Error' });
   }
 });
