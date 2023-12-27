@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,87 +10,104 @@ datasource db {
   url      = env("DATABASE_URL_POSTGRESQL")
 }
 
-model admin {
-  password String
-  username String @unique
-  id       String @id @unique @default(uuid())
-}
-
-model founder {
-  id        Int     
-  name      String?
-  bio       String?
-  linkedIn  String?
-  website   String?
+model founder{
+  id Int
+  name String?
+  bio String?
+  linkedIn String?
+  website String?
   startupId String
-  startup   startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  startup startup @relation(fields: [startupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   @@id([id, startupId])
 }
 
-model job {
-  id                 String               @id @unique
-  companyName        String?
-  startupId          String
-  designation        String?
-  type               String?
-  stipend            String?
-  noOfOffers         String?
-  skillsRequired     String?
-  jobLocation        String?
-  responsibilities   String?
-  assignment         String?
-  deadline           String?
-  selectionProcess   String?
-  startUpId          String?
-  createdAt          String?
-  approval           String?
-  duration           String?
-  startup            startup              @relation(fields: [startupId], references: [id], onDelete: Cascade)
-  studentApplication studentApplication[]
-}
-
-model startup {
-  id            String    @id @unique
-  companyName   String?
-  email         String    @unique
-  otp           String?
-  linkedIn      String?
-  website       String?
-  tracxn        String?
-  social        String?
-  cruchbase     String?
-  sector        String?
+model startup{
+  id String @default(uuid()) @unique @id
+  companyName String?
+  email String @unique
+  otp  String?
+  linkedIn  String?
+  website String?
+  tracxn  String?
+  social  String?
+  cruchbase String?
+  sector  String?
   noOfEmployees String?
   companyVision String?
-  hrName        String?
-  hrEmail       String?
+  founder founder[]
+  jobs  job[]
+  hrName  String?
+  hrEmail String?
   hrDesignation String?
-  founder       founder[]
-  job           job[]
+
 }
 
-model student {
-  id                 String               @id @unique
-  name               String?
-  email              String               @unique
-  otp                String?
-  course             String?
-  department         String?
-  year               String?
-  cgpa               String?
-  resumeLink         String?
-  linkedIn           String?
-  isVerified         Boolean              @default(false)
-  studentApplication studentApplication[]
+enum NotifiedStatus {
+  notified
+  rejected
+  tobedecided
+  tobenotified
 }
 
-model studentApplication {
-  id                 String  @id @unique
-  studentId          String
-  jobId              String
-  status             String  @default("Applied")
-  whyShouldWeHireYou String?
-  job                job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  student            student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+model job{
+  id String @unique @default(uuid()) @id
+  companyName String?
+  startupId String
+  startup startup @relation(fields:[startupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  designation String?
+  type  String?
+  duration String?
+  stipend String?
+  noOfOffers  String?
+  skillsRequired  String?
+  jobLocation String?
+  responsibilities  String?
+  assignment  String?
+  deadline  String?
+  selectionProcess  String?
+  startUpId String?
+  createdAt String?
+  approval  String?
+  studentsApplied studentApplication[]
+  notifiedStatus NotifiedStatus @default(tobedecided)
+}
+
+model studentApplication{
+  id String @unique @default(uuid()) @id
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  studentId String 
+  jobId String
+  job job @relation(fields: [jobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  status String @default("Applied")
+  whyShouldWeHireYou String?  
   @@unique([jobId, studentId])
+}
+
+enum NotificationStatus {
+  receive
+  notreceive
+  updreceive
+  updnotreceive
+}
+
+model student{
+  id String @unique @default(uuid()) @id
+  name String?
+  email String @unique
+  otp  String?
+  course String?
+  department String?
+  year String?
+  cgpa String?
+  resumeLink   String?
+  linkedIn   String?
+  isVerified Boolean @default(false)
+  jobsApplied studentApplication[]
+  notificationStatus NotificationStatus @default(notreceive)
+}
+
+model admin{
+  id String @unique @default(uuid()) @id
+  username String @unique
+  password String
 }
